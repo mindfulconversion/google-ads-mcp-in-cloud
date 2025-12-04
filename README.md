@@ -17,6 +17,18 @@ to provide several
 - `list_accessible_customers`: Returns names of customers directly accessible
   by the user authenticating the call.
 
+## AdCortex demo (Flask + MCP subprocess)
+
+Looking for a quick way to prove the MCP server works end-to-end? Check out the
+`demo_app/` folder for a neon-styled Flask experience that:
+
+- Spawns the official `google-ads-mcp` server via `pipx run --spec git+https://github.com/googleads/google-ads-mcp.git google-ads-mcp`
+- Connects over stdio with the MCP Python client
+- Calls `list_accessible_customers` on demand after a simple passphrase gate (`mc`)
+- Renders the results in the AdCortex interface with animated visuals
+
+See `demo_app/README.md` for environment variables, local run steps, and Azure App Service deployment tips.
+
 ## Notes
 
 1.  The MCP Server will expose your data to the Agent or LLM that you connect to it.

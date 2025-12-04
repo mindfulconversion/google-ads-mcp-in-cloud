@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AdCortex | Next-Gen Paid Ad Intelligence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+    <header class="hero">
+      <div class="logo">
+        <div class="pulse"></div>
+        <span>AdCortex</span>
+      </div>
+      <p class="tagline">Next-gen paid ad intelligence platform</p>
+    </header>
+
+    <main class="card">
+      <div class="holo-ring"></div>
+      <div class="content">
+        <h1>Google Ads MCP Live Pulse</h1>
+        <p class="subtitle">
+          This demo spawns the official Google Ads MCP server on demand, calls
+          <code>list_accessible_customers</code>, and streams the results into this
+          interface.
+        </p>
+
+        {% if error %}
+        <div class="toast error">⚠️ {{ error }}</div>
+        {% endif %}
+
+        {% if not logged_in %}
+        <form method="post" class="panel">
+          <input type="hidden" name="action" value="login" />
+          <label class="field">
+            <span>Enter access passphrase</span>
+            <input type="password" name="password" placeholder="••••" required />
+          </label>
+          <button class="cta" type="submit">Enter AdCortex</button>
+        </form>
+        {% else %}
+        <form method="post" class="panel actions">
+          <input type="hidden" name="action" value="fetch" />
+          <button class="cta" type="submit">Summon MCP + Fetch Customers</button>
+        </form>
+        <form method="post" class="panel muted">
+          <input type="hidden" name="action" value="logout" />
+          <button class="link" type="submit">Exit session</button>
+        </form>
+        {% endif %}
+
+        {% if customers %}
+        <div class="results">
+          <div class="results-header">Accessible Customers</div>
+          <div class="results-grid">
+            {% for customer in customers %}
+            <div class="result-tile">
+              <div class="id">{{ customer.id }}</div>
+              <div class="name">{{ customer.name or 'No label provided' }}</div>
+              <div class="orb"></div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>Powered by Google Ads MCP · Live subprocess + stdio bridge</span>
+    </footer>
+  </body>
+</html>
