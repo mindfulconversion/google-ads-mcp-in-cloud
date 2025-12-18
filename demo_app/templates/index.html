@@ -4,72 +4,225 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AdCortex | Next-Gen Paid Ad Intelligence</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style-two.css') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <div class="bg-grid"></div>
     <div class="bg-glow"></div>
-    <header class="hero">
-      <div class="logo">
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+      <div class="nav-logo">
         <div class="pulse"></div>
         <span>AdCortex</span>
       </div>
-      <p class="tagline">Next-gen paid ad intelligence platform</p>
-    </header>
-
-    <main class="card">
-      <div class="holo-ring"></div>
-      <div class="content">
-        <h1>Google Ads MCP Live Pulse</h1>
-        <p class="subtitle">
-          This demo spawns the official Google Ads MCP server on demand, calls
-          <code>list_accessible_customers</code>, and streams the results into this
-          interface.
-        </p>
-
-        {% if error %}
-        <div class="toast error">⚠️ {{ error }}</div>
-        {% endif %}
-
-        {% if not logged_in %}
-        <form method="post" class="panel">
-          <input type="hidden" name="action" value="login" />
-          <label class="field">
-            <span>Enter access passphrase</span>
-            <input type="password" name="password" placeholder="••••" required />
-          </label>
-          <button class="cta" type="submit">Enter AdCortex</button>
+      <div class="nav-links">
+        {% if logged_in %}
+        <form method="post" action="{{ url_for('logout') }}" style="display: inline;">
+          <button type="submit" class="nav-btn nav-btn-secondary">Logout</button>
         </form>
         {% else %}
-        <form method="post" class="panel actions">
-          <input type="hidden" name="action" value="fetch" />
-          <button class="cta" type="submit">Summon MCP + Fetch Customers</button>
-        </form>
-        <form method="post" class="panel muted">
-          <input type="hidden" name="action" value="logout" />
-          <button class="link" type="submit">Exit session</button>
-        </form>
+        <a href="{{ url_for('login') }}" class="nav-btn nav-btn-primary">
+          <span class="btn-glow"></span>
+          <span class="btn-text">Sign In</span>
+        </a>
         {% endif %}
+      </div>
+    </nav>
 
-        {% if customers %}
-        <div class="results">
-          <div class="results-header">Accessible Customers</div>
-          <div class="results-grid">
-            {% for customer in customers %}
-            <div class="result-tile">
-              <div class="id">{{ customer.id }}</div>
-              <div class="name">{{ customer.name or 'No label provided' }}</div>
-              <div class="orb"></div>
+    {% if logged_in %}
+    <!-- Dashboard View -->
+    <main class="dashboard">
+      <header class="dashboard-header">
+        <div class="welcome-badge">
+          <div class="badge-icon">👋</div>
+          <span>Welcome back</span>
+        </div>
+        <h1>Your <span class="gradient-text">Command Center</span></h1>
+        <p class="subtitle">Access your Google Ads accounts through our MCP-powered bridge</p>
+      </header>
+
+      {% if error %}
+      <div class="toast error">
+        <span class="toast-icon">⚠️</span>
+        <span>{{ error }}</span>
+      </div>
+      {% endif %}
+
+      {% if status %}
+      <div class="toast success">
+        <span class="toast-icon">✅</span>
+        <span>{{ status }}</span>
+      </div>
+      {% endif %}
+
+      <div class="action-panel">
+        <div class="panel-header">
+          <div class="status-indicator online"></div>
+          <span>MCP Server Ready</span>
+        </div>
+        <form method="post" class="action-form">
+          <input type="hidden" name="action" value="fetch" />
+          <button class="cta cta-large" type="submit">
+            <span class="cta-icon">⚡</span>
+            <span class="cta-text">Summon MCP + Fetch Customers</span>
+            <span class="cta-arrow">→</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="action-panel">
+        <div class="panel-header">
+          <div class="status-indicator online"></div>
+          <span>Crew Controls</span>
+        </div>
+        <form method="post" class="action-form" style="margin-bottom: 12px;">
+          <input type="hidden" name="action" value="run_analysis" />
+          <button class="cta cta-large" type="submit">
+            <span class="cta-icon">🧪</span>
+            <span class="cta-text">Run Initial Analysis Crew</span>
+            <span class="cta-arrow">→</span>
+          </button>
+        </form>
+        <form method="post" class="action-form">
+          <input type="hidden" name="action" value="run_hypothesis" />
+          <button class="cta cta-large cta-secondary" type="submit">
+            <span class="cta-icon">💡</span>
+            <span class="cta-text">Run Hypothesis Crew</span>
+            <span class="cta-arrow">→</span>
+          </button>
+        </form>
+      </div>
+
+      {% if customers %}
+      <div class="results">
+        <div class="results-header">
+          <span class="results-title">Accessible Customers</span>
+          <span class="results-count">{{ customers|length }} found</span>
+        </div>
+        <div class="results-grid">
+          {% for customer in customers %}
+          <div class="result-tile">
+            <div class="tile-header">
+              <div class="tile-icon">📊</div>
+              <div class="tile-status active"></div>
             </div>
-            {% endfor %}
+            <div class="id">{{ customer.id }}</div>
+            <div class="name">{{ customer.name or 'No label provided' }}</div>
+            <div class="orb"></div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </main>
+
+    {% else %}
+    <!-- Landing Page Hero -->
+    <main class="hero-section">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          <span>Now with MCP Integration</span>
+        </div>
+        <h1 class="hero-title">
+          Unlock the Power of<br>
+          <span class="gradient-text animated">Ad Intelligence</span>
+        </h1>
+        <p class="hero-subtitle">
+          Next-generation platform that bridges Google Ads with AI through the Model Context Protocol. 
+          Gain real-time insights and control your campaigns like never before.
+        </p>
+        <div class="hero-cta">
+          <a href="{{ url_for('login') }}" class="cta cta-hero">
+            <span>Get Started</span>
+            <span class="cta-arrow">→</span>
+          </a>
+          <a href="#features" class="cta cta-secondary">
+            <span>Learn More</span>
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-value">Real-time</span>
+            <span class="stat-label">Data Sync</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-value">MCP</span>
+            <span class="stat-label">Protocol</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-value">Secure</span>
+            <span class="stat-label">OAuth 2.0</span>
           </div>
         </div>
-        {% endif %}
+      </div>
+      
+      <div class="hero-visual">
+        <div class="visual-card">
+          <div class="visual-glow"></div>
+          <div class="visual-content">
+            <div class="code-block">
+              <div class="code-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="code-title">MCP Server</span>
+              </div>
+              <pre class="code-body"><code><span class="keyword">await</span> session.<span class="function">call_tool</span>(
+  <span class="string">"list_accessible_customers"</span>,
+  { timeout: <span class="number">45</span> }
+);
+
+<span class="comment">// ✓ Connected to Google Ads API</span>
+<span class="comment">// ✓ Fetching customer accounts...</span>
+<span class="comment">// ✓ 12 accounts found</span></code></pre>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>Lightning Fast</h3>
+          <p>Real-time data streaming through stdio bridge with sub-second response times.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Enterprise Security</h3>
+          <p>OAuth 2.0 authentication with Google Cloud, your credentials never leave your environment.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>AI-Ready</h3>
+          <p>Built on Model Context Protocol for seamless integration with AI assistants and agents.</p>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
     <footer class="footer">
-      <span>Powered by Google Ads MCP · Live subprocess + stdio bridge</span>
+      <div class="footer-content">
+        <span>Powered by Google Ads MCP</span>
+        <span class="footer-dot">•</span>
+        <span>Live subprocess + stdio bridge</span>
+      </div>
     </footer>
   </body>
 </html>

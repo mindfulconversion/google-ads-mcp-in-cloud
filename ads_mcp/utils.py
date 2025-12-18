@@ -16,7 +16,7 @@
 
 """Common utilities used by the MCP server."""
 
-from typing import Any
+from typing import Any, Optional
 import proto
 import logging
 from google.ads.googleads.client import GoogleAdsClient
@@ -26,9 +26,11 @@ from google.ads.googleads.v21.services.services.google_ads_service import (
 
 from google.ads.googleads.util import get_nested_attr
 import google.auth
+from google.auth.credentials import Credentials
 from ads_mcp.mcp_header_interceptor import MCPHeaderInterceptor
 import os
 import importlib.resources
+from google.auth.exceptions import RefreshError
 
 # filename for generated field information used by search
 _GAQL_FILENAME = "gaql_resources.json"
@@ -40,7 +42,7 @@ logging.basicConfig(level=logging.INFO)
 _READ_ONLY_ADS_SCOPE = "https://www.googleapis.com/auth/adwords"
 
 
-def _create_credentials() -> google.auth.credentials.Credentials:
+def _create_credentials() -> Credentials:
     """Returns Application Default Credentials with read-only scope."""
     (credentials, _) = google.auth.default(scopes=[_READ_ONLY_ADS_SCOPE])
     return credentials
@@ -48,8 +50,8 @@ def _create_credentials() -> google.auth.credentials.Credentials:
 
 def _get_developer_token() -> str:
     """Returns the developer token from the environment variable GOOGLE_ADS_DEVELOPER_TOKEN."""
-    dev_token = os.environ.get("GOOGLE_ADS_DEVELOPER_TOKEN")
-    if dev_token is None:
+    dev_token = os.environ.get("GOOGLE_ADS_DEVELOPER_TOKEN") or ""
+    if not dev_token:
         raise ValueError(
             "GOOGLE_ADS_DEVELOPER_TOKEN environment variable not set."
         )
@@ -62,28 +64,45 @@ def _get_login_customer_id() -> str:
 
 
 def _get_googleads_client() -> GoogleAdsClient:
-    # Use this line if you have a google-ads.yaml file
-    # client = GoogleAdsClient.load_from_storage()
-    client = GoogleAdsClient(
+    """Constructs a GoogleAdsClient using either google-ads.yaml or ADC.
+
+    Priority:
+    1) If GOOGLE_ADS_CONFIGURATION_FILE_PATH is set and exists, use it.
+    2) Otherwise fall back to Application Default Credentials (ADC).
+    """
+    cfg_path = os.environ.get("GOOGLE_ADS_CONFIGURATION_FILE_PATH")
+    if cfg_path:
+        if not os.path.isfile(cfg_path):
+            raise ValueError(f"google-ads.yaml not found at: {cfg_path}")
+        return GoogleAdsClient.load_from_storage(cfg_path)
+
+    # Fallback: ADC via gcloud or environment-provided credentials
+    return GoogleAdsClient(
         credentials=_create_credentials(),
         developer_token=_get_developer_token(),
         login_customer_id=_get_login_customer_id(),
     )
 
-    return client
 
+_googleads_client: Optional[GoogleAdsClient] = None
 
-_googleads_client = _get_googleads_client()
+def _get_or_create_googleads_client() -> GoogleAdsClient:
+    global _googleads_client
+    if _googleads_client is None:
+        _googleads_client = _get_googleads_client()
+    return _googleads_client
 
 
 def get_googleads_service(serviceName: str) -> GoogleAdsServiceClient:
-    return _googleads_client.get_service(
+    client = _get_or_create_googleads_client()
+    return client.get_service(
         serviceName, interceptors=[MCPHeaderInterceptor()]
     )
 
 
 def get_googleads_type(typeName: str):
-    return _googleads_client.get_type(typeName)
+    client = _get_or_create_googleads_client()
+    return client.get_type(typeName)
 
 
 def format_output_value(value: Any) -> Any:

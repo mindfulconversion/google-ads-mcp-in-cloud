@@ -1,3 +1,8 @@
 flask>=3.0
 anyio>=4.4
-mcp>=1.2.0
+mcp[cli]>=1.2.0
+google-ads>=28.0.0
+crewai
+crewai-tools
+crewai[google-genai]
+python-dotenv>=1.0

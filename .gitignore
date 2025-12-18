@@ -5,6 +5,10 @@
 .gemini
 .vscode
 
+# ALL
+*
+/*
+
 # Distribution / packaging
 .Python
 build/
@@ -35,3 +39,8 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+
+#Secrets
+application_default_credentials.json
+client_secret*
+.env
